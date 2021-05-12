@@ -1,0 +1,69 @@
+from machine import Pin, I2C, Timer
+from ssd1306 import SSD1306_I2C
+import math
+import utime
+import _thread
+from machine import ADC
+from time import sleep
+son_zaman=0
+bpmzaman=False
+atistamam=False
+bpm=0
+bpm_onceki=0
+bpm_simdiki=1
+ustesik=560
+altesik=530     
+adc = ADC(26)
+suanki_zaman=utime.ticks_ms()
+sda=machine.Pin(4)
+scl=machine.Pin(5)
+i2c=machine.I2C(0,sda=sda, scl=scl, freq=400000)
+oled = SSD1306_I2C(128, 64, i2c)
+oled.fill(0) 
+oled.text("bpm:...",6,2)
+oled.show()
+def bpm_thread():
+    while True:
+     suanki_zaman=utime.ticks_ms()
+     global atistamam ,bpmzaman ,bpm ,son_zaman,bpm_onceki,bpm_simdiki
+     deger = round(adc.read_u16()/64)
+     print(deger)
+     print("suanki zaman")
+     print(suanki_zaman)
+     if deger > ustesik :
+       if atistamam==True :
+         print("son zaman")
+         print(son_zaman)
+         bpm =(suanki_zaman-son_zaman)
+         bpm =round(1000*(60/bpm))
+         bpmzaman=False
+         atistamam=0
+         print("bpm")
+         print(bpm)
+       if bpmzaman==0 :
+         son_zaman=utime.ticks_ms()
+         bpmzaman=True
+         print("bpmzaman")
+     if deger < altesik and bpmzaman :
+       atistamam=True
+       print("deger<altesiik")
+     print("atistamam")
+     print(atistamam)
+     print("bpm son")
+     print(bpm)
+     bpm_onceki=bpm_simdiki
+     bpm_simdiki=deger
+     if bpm_simdiki==bpm_onceki and bpm>0:  
+        bpm=0
+     sleep(0.1)
+_thread.start_new_thread(bpm_thread, ())
+while True:
+    for i in range(1,127):
+      adc_okuma = round(adc.read_u16()/512)
+      y=math.ceil((adc_okuma/2)-1)
+      oled.pixel(i,y,1)  
+      oled.show()
+    oled.fill(0)
+    oled.text("bpm: ",6,2)
+    oled.text(str(bpm),40,2)
+    oled.show()
