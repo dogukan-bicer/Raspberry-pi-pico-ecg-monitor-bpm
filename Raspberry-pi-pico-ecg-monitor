@@ -27,30 +27,17 @@ def bpm_thread():
      suanki_zaman=utime.ticks_ms()
      global atistamam ,bpmzaman ,bpm ,son_zaman,bpm_onceki,bpm_simdiki
      deger = round(adc.read_u16()/64)
-     print(deger)
-     print("suanki zaman")
-     print(suanki_zaman)
      if deger > ustesik :
        if atistamam==True :
-         print("son zaman")
-         print(son_zaman)
          bpm =(suanki_zaman-son_zaman)
          bpm =round(1000*(60/bpm))
          bpmzaman=False
          atistamam=0
-         print("bpm")
-         print(bpm)
        if bpmzaman==0 :
          son_zaman=utime.ticks_ms()
          bpmzaman=True
-         print("bpmzaman")
      if deger < altesik and bpmzaman :
        atistamam=True
-       print("deger<altesiik")
-     print("atistamam")
-     print(atistamam)
-     print("bpm son")
-     print(bpm)
      bpm_onceki=bpm_simdiki
      bpm_simdiki=deger
      if bpm_simdiki==bpm_onceki and bpm>0:  
